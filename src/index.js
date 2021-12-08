@@ -1,17 +1,38 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { useState } from "react"
+import ReactDOM from "react-dom"
+
+const App = () => {
+  return (
+    <div>
+      <HookSwitcher />
+    </div>
+  )
+}
+
+const HookSwitcher = () => {
+  const [color, setColor] = useState("grey")
+  const [fontSize, setFontSize] = useState(14)
+
+  return (
+    <div
+      style={{ padding: "10px", background: color, fontSize: `${fontSize}px` }}
+    >
+      Hello World
+      <button onClick={() => setColor("grey")}>Dark</button>
+      <button onClick={() => setColor("white")}>Light</button>
+      <button onClick={() => setFontSize(Currentsize => Currentsize - 2)}>
+        Smaller
+      </button>
+      <button onClick={() => setFontSize(Currentsize => Currentsize + 2)}>
+        Digger
+      </button>
+    </div>
+  )
+}
 
 ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root')
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  document.getElementById("root")
+)
