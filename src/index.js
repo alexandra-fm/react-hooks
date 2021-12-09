@@ -1,4 +1,4 @@
-import React, { useState, Component, useEffect } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import ReactDOM from "react-dom"
 
 const App = () => {
@@ -21,30 +21,71 @@ const App = () => {
   }
 }
 
-//Собственный хуки должны начинаться с use
-const usePlanetInfo = id => {
-  const [name, setName] = useState(null)
+const getPlanet = id => {
+  return fetch(`https://swapi.dev/api/planets/${id}`)
+    .then(res => res.json())
+    .then(data => data)
+}
 
-  const getPlanet = (id, cancelled) => {
-    fetch(`https://swapi.dev/api/planets/${id}`)
-      .then(res => res.json())
-      .then(data => !cancelled && setName(data.name))
-  }
+const useRequest = request => {
+  const initialState = useMemo(
+    () => ({
+      data: null,
+      loading: true,
+      error: null,
+    }),
+    []
+  )
+
+  const [dataState, setDataState] = useState(initialState)
 
   useEffect(() => {
+    setDataState(initialState)
     let cancelled = false
-    getPlanet(id, cancelled)
+    request()
+      .then(
+        data =>
+          !cancelled &&
+          setDataState({
+            data,
+            loading: false,
+            error: null,
+          })
+      )
+      .catch(
+        error =>
+          !cancelled &&
+          setDataState({
+            data: null,
+            loading: false,
+            error: true,
+          })
+      )
     return () => (cancelled = true)
-  }, [id])
+  }, [request, initialState])
 
-  return name
+  return dataState
+}
+
+const usePlanetInfo = id => {
+  const request = useCallback(() => getPlanet(id), [id])
+
+  return useRequest(request)
 }
 
 const PlanetInfo = ({ id }) => {
-  const name = usePlanetInfo(id)
+  const { data, loading, error } = usePlanetInfo(id)
+
+  if (error) {
+    return <div>Something gone wrong</div>
+  }
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
   return (
     <div>
-      {`Planet number ${id}`} - {name}
+      {`Planet number ${id}`} - {data.name}
     </div>
   )
 }
